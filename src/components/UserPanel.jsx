@@ -4,6 +4,20 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../api';
 import './UserPanel.css';
 
+function monitorDevTools(callback) {
+  let threshold = 160; // ms
+  let interval = setInterval(() => {
+    const start = performance.now();
+    debugger; // DevTools open → takes longer to resume
+    const time = performance.now() - start;
+    if (time > threshold) {
+      callback();
+    }
+  }, 1000);
+
+  return () => clearInterval(interval); // Cleanup
+}
+
 function UserPanel() {
   const navigate = useNavigate();
   const [videos, setVideos] = useState([]);
@@ -91,6 +105,33 @@ function UserPanel() {
       setWatermarkPosition({top: topPosition, right: rightPosition});
     },1000)
     return() => clearInterval(watermarkRenderInterval);
+  }, []);
+
+  useEffect(() => {
+    const handleSecurityBreach = () => {
+      alert('Security Violation Detected! Logging out...');
+      logout();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        handleSecurityBreach();
+      }
+    };
+
+    const handleBlur = () => {
+      handleSecurityBreach();
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("blur", handleBlur);
+    const stopMonitor = monitorDevTools(handleSecurityBreach);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("blur", handleBlur);
+      stopMonitor(); // stop DevTools detection loop
+    };
   }, []);
 
   return (
