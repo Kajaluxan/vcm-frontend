@@ -39,6 +39,14 @@
   padding: 1.5rem;
   margin-bottom: 2rem;
   text-align: left;
+  
+}
+
+.table-container {
+  max-height: 800px;       /* Set the height you want */
+  overflow-y: auto;        /* Enable vertical scroll */
+  overflow-x: auto;        /* Enable horizontal scroll if needed */
+  border: 1px solid #ccc;  /* Optional: for visual clarity */
 }
 
 .section h3 {
@@ -52,6 +60,8 @@
   width: 100%;
   border-collapse: collapse;
   margin-top: 0.5rem;
+  
+
 }
 
 .user-table th,

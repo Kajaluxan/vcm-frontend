@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api';
+import axios from 'axios';
 import './AdminPanel.css';
 
 function AdminPanel() {
@@ -10,6 +11,7 @@ function AdminPanel() {
   const [video, setVideo] = useState(null);
   const [allUsers, setAllUsers] = useState([]);
   const [pdfs, setPdfs] = useState([]);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const logout = () => {
     localStorage.removeItem('token');
@@ -60,10 +62,40 @@ function AdminPanel() {
 
   const uploadVideo = async (e) => {
     e.preventDefault();
-    const form = new FormData();
-    form.append('video', video);
-    await api.post('/upload', form);
-    fetchVideos();
+    if (!video) return alert("Please select a video");
+
+    try {
+      // Step 1: Get presigned upload URL
+      const { data } = await api.post('/generate-presigned-url', {
+        fileName: video.name,
+        fileType: video.type,
+      });
+
+      const { url, key } = data;
+
+      // Step 2: Upload directly to S3
+      await axios.put(url, video, {
+        headers: { 'Content-Type': video.type },
+        onUploadProgress: (e) => {
+          const percent = Math.round((e.loaded / e.total) * 100);
+          console.log(`Uploading: ${percent}%`);
+          setUploadProgress(percent);
+        }
+      });
+
+      // Step 3: Register video in DB
+      await api.post('/register-video', {
+        originalName: video.name,
+        key
+      });
+
+      alert("Upload successful");
+      setVideo(null); // clear selected file
+      fetchVideos(); // refresh list
+    } catch (err) {
+      console.error("Upload failed:", err);
+      alert("Upload failed");
+    }
   };
 
   const deleteVideo = async (id) => {
@@ -148,7 +180,7 @@ function AdminPanel() {
       </div>
 
       <div className="section">
-        <h3>All Registered Users</h3>
+        <h3>Approved Users</h3>
         <table className="user-table">
           <thead>
             <tr>
@@ -164,6 +196,7 @@ function AdminPanel() {
                   <span className={user.approved ? "badge-approved" : "badge-pending"}>
                     {user.approved ? "Approved" : "Pending"}
                   </span>
+                  <button className="action-btn reject" onClick={() => rejectUser(user.id)}>Remove</button>
                 </td>
               </tr>
             ))}
@@ -182,6 +215,22 @@ function AdminPanel() {
           />
           <button className="submit-btn" type="submit">Upload</button>
         </form>
+        {uploadProgress > 0 && (
+          <div style={{ marginTop: '10px' }}>
+            <p>Uploading: {uploadProgress}%</p>
+            <div style={{ width: '100%', background: '#eee', borderRadius: '5px' }}>
+              <div
+                style={{
+                  width: `${uploadProgress}%`,
+                  backgroundColor: '#4caf50',
+                  height: '8px',
+                  borderRadius: '5px',
+                  transition: 'width 0.2s ease',
+                }}
+              ></div>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="section">
@@ -201,7 +250,9 @@ function AdminPanel() {
       <div className="section">
         <h3>Videos</h3>
         <ul className="list">
-          {videos.map(v => (
+          {videos
+          .sort((a, b) => a.id - b.id)
+          .map(v => (
             <li className="list-item" key={v.id}>
               {v.original_name}
               <div className="action-buttons">

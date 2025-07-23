@@ -3,7 +3,7 @@ import axios from 'axios';
 
 export const api = axios.create({
   //baseURL: 'http://localhost:4000', 
-  baseURL: 'https://voo0rhkip9.execute-api.eu-north-1.amazonaws.com/9',
+  baseURL: 'https://voo0rhkip9.execute-api.eu-north-1.amazonaws.com/1',
   
   
   
