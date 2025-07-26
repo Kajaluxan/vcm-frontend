@@ -28,12 +28,14 @@ The VCM Platform allows users to upload large video files and documents, while a
 | Auth          | JSON Web Tokens (JWT)                    |
 | Tools         | Git, Postman                             |
 
+## 🔗 Backend Repository
+- [GitHub – vcm-backend](https://github.com/Kajaluxan/vcm-backend.git)
+
 ## 🚀 Getting Started
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/your-username/vcm-platform.git
-cd vcm-platform
+git clone https://github.com/<username>/<repo-name>.git
 ```
 
 ### 2. Install Dependencies
@@ -72,7 +74,7 @@ S3_BUCKET_NAME=your_bucket_name
 #### Backend
 ```bash
 cd backend
-npm start
+node index.js
 ```
 
 #### Frontend
@@ -84,20 +86,12 @@ npm run dev
 ## 📁 Project Structure
 
 ```
-vcm-platform/
-├── backend/         # Express.js API
-├── frontend/        # React app (Vite)
-├── README.md
-└── .env
+
+backend/         # Express.js API
+frontend/        # React app (Vite)
+README.md
 ```
 
-## 📸 Screenshots
-
-> *(Add screenshots of the upload interface, admin dashboard, etc.)*
-
-## 🤝 Contributing
-
-Feel free to fork the repository and submit pull requests. Contributions are welcome!
 
 ## 📄 License
 
